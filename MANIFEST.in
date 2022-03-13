@@ -1,0 +1,6 @@
+include src/aids/help.txt
+include src/aids/backups/
+recursive-include src/aids/app/test_files *
+recursive-include src/aids/templates *
+recursive-include src/aids/static *
+exclude *index.html

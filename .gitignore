@@ -1,0 +1,9 @@
+env/*
+__pycache__/
+*.log
+*.error
+*.sqlite
+*~
+*.swp
+*.json
+*.un~
