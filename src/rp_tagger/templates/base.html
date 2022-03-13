@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+		<link rel="stylesheet" href="/static/css/base.css">
+		<link rel="stylesheet" href="/static/css/home.css">
+		<title>{% block title %}{% endblock %}</title>
+	</head>
+	<body>
+		<div id="header">
+			<span class="logo">Image Tagger</span>
+			<ul class="menu">
+				<li><a href="/">Classify</a></li>
+				<li><a href="/images">Images</a></li>
+			</ul>
+		</div>
+		<div id="content">
+			{% block body %}
+			{% endblock %}
+		</div>
+	<script src="/static/js/jquery-3.6.0.min.js"></script>
+	<script src="/static/js/js.cookie.min.js"></script>
+	<script>
+                $(document).ready(function(){
+                        {% block domready %}
+                        {% endblock %}
+                });
+        </script>
+	</body>
+</html>
+	    
+	

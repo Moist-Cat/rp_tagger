@@ -1,5 +1,6 @@
 from rp_tagger.settings import DATABASES
 from rp_tagger.db import *
+from rp_tagger.api import *
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

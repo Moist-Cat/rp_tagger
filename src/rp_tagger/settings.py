@@ -57,7 +57,7 @@ LOGGERS = {
         "global": {
             "handlers": ("console",),
             "level": "INFO" if DEBUG is False else "DEBUG",
-        }
+        },
     },
 }
 

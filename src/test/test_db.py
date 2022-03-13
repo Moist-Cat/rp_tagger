@@ -1,3 +1,4 @@
+import os
 from typing import Union
 from pathlib import Path
 import unittest
@@ -14,6 +15,7 @@ ENGINE = db["engine"]
 
 TEST_FILES = settings.TEST_IMAGES_DIR
 TEST_DIR = settings.TEST_DIR
+UNCLS_DIR = TEST_DIR / "test_unclassified.json"
 
 def build_test_db(
         name: Union[Path, str]=ENGINE,
@@ -30,27 +32,32 @@ def build_test_db(
     return engine
 
 class Test_API(unittest.TestCase):
+    
+    def setUp(self):
+        try:
+            os.remove(UNCLS_DIR)
+        except FileNotFoundError:
+            pass
 
     def test_load_images(self):
         images = load_images(TEST_FILES)
-        self.assertEqual(len(images), 8)
+        self.assertEqual(len(images), 9)
 
         image = images[0]
-        self.assertEqual(image[1], ["sci",])
+        self.assertEqual(image["tags"], ["sci",])
 
     def test_dump_unclassified(self):
-        UNCLS_DIR = TEST_DIR / "test_unclassified.json"
         images = load_images(TEST_FILES)
         dump_unclassified(images, UNCLS_DIR)
 
         uncls = load_unclassified(UNCLS_DIR)
 
         x = uncls[0]
-        y = list(images[0])
+        y = images[0]
         self.assertEqual(x, y)
 
         x_2 = uncls[1]
-        y_2 = list(images[1])
+        y_2 = images[1]
         self.assertEqual(x_2, y_2)
  
 def main_suite() -> unittest.TestSuite:

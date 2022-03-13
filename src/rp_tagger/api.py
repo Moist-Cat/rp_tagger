@@ -1,8 +1,8 @@
+import uuid
 from datetime import datetime
 from sqlalchemy import desc, create_engine
 from sqlalchemy.orm import sessionmaker
 import json
-from PIL import Image
 import logging
 from typing import Union, List, Set, Tuple, Dict
 import os
@@ -15,27 +15,47 @@ from rp_tagger.log import logged
 
 log = logging.getLogger("global")
 
-def load_images(path: Union[str, Path]=IMAGES_FROM_PATH) -> List[Tuple[str, Set[str]]]:
+def load_images(path: Union[str, Path]=IMAGES_FROM_PATH) -> List[List[Union[str, List[str]]]]:
     """Loads images from the selected folder recursively and tries to guess
     the tags from the name"""
     images = []
     for ext in ACCEPT:
-        new_images = glob(str(path) + f"/**/{ext}")
+        new_images = glob(str(path) + f"/**/{ext}", recursive=True)
 
         # we try to guess the tags from the folders
         for image in new_images:
-            tags = list(set((Path(image).parent.parts)).difference(set(path.parts)))
+            tags = list(set((Path(image).parent.parts)).difference(set(Path(path).parts)))
             log.debug("Recognized %d tags", len(tags))
-            images.append((image, tags))
+            images.append({"path":image, "tags":tags})
         log.info(f"Fetched %d %s files", len(new_images), ext)
     log.info(f"Fetched a total of %d files", len(images))
     return images
 
-def dump_unclassified(images: List[str], file: BASE_DIR / "unclassified.json"):
+def dump_unclassified(
+        images: List[Tuple[str, List[str]]],
+        file: str=BASE_DIR / "unclassified.json"
+    ):
+    # chrome doesn't load local resources so we have to move them
+    try:
+        current_images = load_unclassified()
+    except FileNotFoundError:
+        current_images = []
+    for image in images:
+        name = str(uuid.uuid4()) + "." + image["path"].split(".")[-1]
+        log.info("Loaded image %s", name)
+        id = uuid.uuid4()
+        with open(BASE_DIR / "static"/ "img" / name, "w+b") as outfile:
+            with open(image["path"], "r+b") as infile:
+                 outfile.write(infile.read())
+                 image["id"] = name
+        os.remove(image["path"])
+        current_images.append(image)
     with open(file, "w") as file:
-        file.write(json.dumps(images))
+        file.write(json.dumps(current_images))
+    log.info("There are currently %d unclassified images", len(current_images))
+    return len(images)
 
-def load_unclassified(file: BASE_DIR / "unclassified.json"):
+def load_unclassified(file: str=BASE_DIR / "unclassified.json"):
     with open(file) as file:
         data = json.loads(file.read())
     return data

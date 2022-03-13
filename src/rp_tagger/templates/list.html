@@ -1,0 +1,18 @@
+{% for image in images %}
+	<div class="image">
+		<div id="toolbox" class="window" href="/static/img/{{ image['id']}}">
+			<a href="#openModal{{ loop.index }}"><img src="/static/img/{{ image['id'] }}"></a>
+		</div>
+	</div>
+	<div id="openModal{{ loop.index }}" class="modalDialog">
+		<a href="/static/img/{{ image['id'] }}" class="image"><img src="/static/img/{{ image['id'] }}"></a>
+		{% if "tags" in image %}
+		<div class="info">
+			{% for tag in image["tags"] %}
+				<a href="/images?tags={{tag}}" class="title">{{ tag }}</a>
+			{% endfor %}
+		</div>
+		{% endif %}
+		<a href="#"><span class="close">x</span></a>
+	</div>
+{% endfor %}
