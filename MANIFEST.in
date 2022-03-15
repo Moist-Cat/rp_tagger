@@ -1,6 +1,4 @@
-include src/aids/help.txt
-include src/aids/backups/
-recursive-include src/aids/app/test_files *
-recursive-include src/aids/templates *
-recursive-include src/aids/static *
-exclude *index.html
+recursive-include src/test/test_images *
+recursive-include src/rp_tagger/templates *
+recursive-include src/rp_tagger/static *
+exclude src/rp_tagger/static/img *

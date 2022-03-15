@@ -10,9 +10,12 @@ TEST_IMAGES_DIR = TEST_DIR / "test_images"
 IMAGES_FROM_PATH = "/home/luis/Downloads/"
 IMAGES_TO_PATH = "/home/luis/Pictures/RP/"
 
+UNCLS_IMAGES_DIR = BASE_DIR / "static" / "img"
+
 # Config
 DEBUG = True
 ACCEPT = ["*.png", "*.jpg", "*.gif", "*.webm"]
+DELETE_ORIGINAL = True
 
 # Database
 DATABASES = {

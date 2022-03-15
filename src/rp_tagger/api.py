@@ -1,10 +1,10 @@
-import uuid
 from datetime import datetime
 from sqlalchemy import desc, create_engine
 from sqlalchemy.orm import sessionmaker
 import json
 import logging
-from typing import Union, List, Set, Tuple, Dict
+# the project is too unstable atm to make type hints
+#from typing import Union, List, Set, Tuple, Dict
 import os
 from glob import glob
 from pathlib import Path
@@ -15,7 +15,7 @@ from rp_tagger.log import logged
 
 log = logging.getLogger("global")
 
-def load_images(path: Union[str, Path]=IMAGES_FROM_PATH) -> List[List[Union[str, List[str]]]]:
+def load_images(path=IMAGES_FROM_PATH):
     """Loads images from the selected folder recursively and tries to guess
     the tags from the name"""
     images = []
@@ -32,34 +32,28 @@ def load_images(path: Union[str, Path]=IMAGES_FROM_PATH) -> List[List[Union[str,
     return images
 
 def dump_unclassified(
-        images: List[Tuple[str, List[str]]],
-        file: str=BASE_DIR / "unclassified.json"
+        images,
+        file=BASE_DIR / "unclassified.json",
     ):
-    # chrome doesn't load local resources so we have to move them
     try:
-        current_images = load_unclassified()
+        current_images = load_unclassified(file)
     except FileNotFoundError:
         current_images = []
-    for image in images:
-        name = str(uuid.uuid4()) + "." + image["path"].split(".")[-1]
-        log.info("Loaded image %s", name)
-        id = uuid.uuid4()
-        with open(BASE_DIR / "static"/ "img" / name, "w+b") as outfile:
-            with open(image["path"], "r+b") as infile:
-                 outfile.write(infile.read())
-                 image["id"] = name
-        os.remove(image["path"])
-        current_images.append(image)
+
+    current_images.extend(images)
+
     with open(file, "w") as file:
         file.write(json.dumps(current_images))
     log.info("There are currently %d unclassified images", len(current_images))
-    return len(images)
 
-def load_unclassified(file: str=BASE_DIR / "unclassified.json"):
-    with open(file) as file:
+    return current_images
+
+def load_unclassified(infile=BASE_DIR / "unclassified.json"):
+    with open(infile) as file:
         data = json.loads(file.read())
     return data
 
+@logged
 class DBClient:
 
     def __init__(self):
@@ -70,7 +64,7 @@ class DBClient:
     def __delete__(self):
         self.session.close()
 
-    def add_tag(self, name: str):
+    def add_tag(self, name):
         self.session.begin()
 
         new_tag = Tag(name == name)
@@ -78,7 +72,7 @@ class DBClient:
 
         self.session.commit()
 
-    def delete_tag(self, name: str):
+    def delete_tag(self, name):
         self.session.begin()
 
         tag = self.session.query(Tag).filter(Tag.name == name).one()
@@ -86,7 +80,7 @@ class DBClient:
 
         self.session.commit()
 
-    def query_tag(self, name: str):
+    def query_tag(self, name):
         tag = self.session.query(Image).filter(Tag.name == name).join(tag_relationship).join(Image).all()
         return tag
 
@@ -94,7 +88,7 @@ class DBClient:
         tags = self.session.query(Tag).order_by(desc(Tag.hits)).limit(10)
         return tags
 
-    def add_image(self, path: str):
+    def add_image(self, path):
         self.session.begin()
 
         new_image = Image(path=path)
@@ -102,7 +96,10 @@ class DBClient:
         
         self.session.commit()
 
-    def delete_image(self, path: str):
+    def delete_image(self, path):
+        return
+
+        ####################
         self.session.begin()
 
         image = self.session.query(Image).filter(Image.path == path).one()
@@ -112,7 +109,7 @@ class DBClient:
 
         self.session.commit()
 
-    def query_image(self, tags: str):
+    def query_image(self, tags):
         image = self.session.query(Image).join(tag_relationship).join(Tag).filter(Tag.name in tags)
         return image
 
@@ -120,7 +117,7 @@ class DBClient:
         images = self.session.query(Image).order_by(desc(Image.hits)).limit(10)
         return images
 
-    def update_image(self, path: str):
+    def update_image(self, path):
         self.session.begin()
 
         self.session.execute(

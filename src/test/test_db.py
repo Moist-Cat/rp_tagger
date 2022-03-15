@@ -1,10 +1,7 @@
 import os
-from typing import Union
+#from typing import Union
 from pathlib import Path
 import unittest
-
-#from sqlalchemy import create_engine, func
-#from sqlalchemy.orm import sessionmaker
 
 from rp_tagger.db import Image, Tag, tag_relationship
 from rp_tagger.api import load_images, load_unclassified, dump_unclassified
@@ -18,7 +15,7 @@ TEST_DIR = settings.TEST_DIR
 UNCLS_DIR = TEST_DIR / "test_unclassified.json"
 
 def build_test_db(
-        name: Union[Path, str]=ENGINE,
+        name=ENGINE,
     ):
     """
     Create test database and schema.
