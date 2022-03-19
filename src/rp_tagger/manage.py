@@ -1,6 +1,8 @@
-from rp_tagger.db import create_db
-from rp_tagger.settings import DATABASES
+import os
 import sys
+
+from rp_tagger.db import create_db
+from rp_tagger.conf import settings
 
 def get_command(command: list=sys.argv[1]):
     """Macros to maange the db"""
@@ -8,7 +10,7 @@ def get_command(command: list=sys.argv[1]):
         import test.shell
 
     elif command == "makemigrations":
-        create_db(DATABASES["default"]["engine"])
+        create_db(settings.DATABASES["default"]["engine"])
 
     elif command == "test":
         from test import test_db
@@ -17,6 +19,10 @@ def get_command(command: list=sys.argv[1]):
     elif command == "runserver":
         from rp_tagger.server import runserver
         runserver()
+
+    elif command == "livetest":
+        from test.ft.test_server import run_test_server
+        run_test_server()
 
 
 if __name__ == "__main__":

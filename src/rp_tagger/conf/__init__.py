@@ -1,0 +1,22 @@
+import os
+import importlib
+
+class ImproperlyConfigured(Exception):
+    pass
+
+ENVIRONMENT_VARIABLE = "TAGGER_SETTINGS_MODULE"
+
+class Settings:
+    def __init__(self, settings_module=None):
+        self.SETTINGS_MODULE = settings_module or os.environ.get(ENVIRONMENT_VARIABLE) or "rp_tagger.conf.pro"
+
+        mod = importlib.import_module(self.SETTINGS_MODULE)
+
+        for setting in dir(mod):
+            if setting.isupper(): # only allow upper-case settings
+                settings_value = getattr(mod, setting)
+                setattr(self, setting, settings_value)
+    def __repr__(self):
+        return f"{self.__class__.__name__}: \"{self.SETTINGS_MODULE}\""
+
+settings = Settings()

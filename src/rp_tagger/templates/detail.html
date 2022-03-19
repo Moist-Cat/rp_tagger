@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Tag an image{% endblock %}
+
+{% block body %}
+        <h1>Add a new tag</h1>
+	{% set img_path = "/".join(image['path'].split('/')[-3:]) %}
+	<a href="{{ img_path }}">
+	{% if img_path.split('.')[-1] not in ("webm", "webp") %}
+		<img id="{{ image['id'] }}" src="{{ img_path }}" class="image-detail"></img>
+	{% else %}
+		<video id="{{ image['id'] }}" src="{{ img_path }}" class="image-detail"></video>
+	{% endif %}
+	</a>
+	<div class="image-likes">
+		<input id="id_new_tag" name="new_tag">
+		<div id="id_tag_list" class="tag_list">
+		{% if "tags" in image %}
+			{% for tag in image["tags"] %}
+				<button name="tag" id="id_tag_{{ tag['name'] }}">{{ tag["name"] }}</button>
+			{% endfor %}
+		{% endif %}
+		</div>
+
+	</div> 
+	<div class="sidebar">
+		<h2>Most popular tags</h2>
+		{% for tag in popular_tags %}
+			<button name="tag_{{ tag['name'] }}" id="id_popular_tag_{{ tag['name'] }}">{{ tag["name"] }}</button>
+		{% endfor %}
+	</div>
+{% endblock %}
+{% block domready %}
+var $input = $('#id_new_tag')
+
+var SPACE = 32
+var ENTER = 13
+
+var tags_text = new Array()
+
+var b = $("#id_tag_list").children()
+
+var tags = b.wrapAll()
+
+for (var i = 0; i < tags.length; ++i) {
+	tags_text.push(tags[i].textContent);
+}
+
+$input.focus()
+
+$input.keyup(function(e) {
+	if (e.which === ENTER) {
+		// submit tag
+		var $tags = $('#id_tag').text;
+		$.post('/add_tags', {
+			id: $('img').attr("id"),
+			tags: tags_text
+	   }, function(data) {
+		location.reload()
+	      })
+	}
+	if (e.which === SPACE) {
+		// new tag
+		tag_name = $input.val().substring(0, $input.val().length - 1)
+		if (tag_name != '') {
+			$('#id_tag_list').append(
+			'<button name="tag" id="id_tag">' + tag_name + '</button>'
+			)
+			$input.val('')
+			tags_text.push(tag_name)
+		}
+	}
+})
+
+{% for tag in image["tags"] %}
+$('#id_tag_{{ tag['name'] }}').click(function(e) {
+	tags_text.splice(tags_text.indexOf($(this).text()), 1)
+	$(this).detach()
+})
+{% endfor %}
+{% for tag in  popular_tags %}
+$("#id_popular_tag_{{ tag['name'] }}").click(function(e) {
+	tag_name = $(this).text()
+	if (tag_name != "") {
+		tags_text.push(tag_name)
+		console.log(tags_text)
+		$('#id_tag_list').append(
+			'<button name="tag" id="id_tag">' + tag_name + '</button>'
+		)
+	}
+});
+{% endfor  %}
+{% endblock %}

@@ -2,7 +2,12 @@
 {% block title %}Unclassified Images{% endblock %}
 {% block body %}
 	<h2>Select an image</h2>
+	<form action="/" method="get">
+		<p>Search tags(Space-separated)</p>
+		<input id="id_search_tags" name="search_tags" class="text">
+	</form>
 	<div id="image-list">
+		<!--- Stuff goes here --->
 	</div>
 {% endblock %}
 {% block domready %}
@@ -10,7 +15,15 @@ var page = 0;
 var empty_page = false;
 var block_request = false;
 
-a=$.get('/data-uncls?page=' + page, function(data) {
+var tags = ""
+let sp = new URLSearchParams(window.location.search)
+var has = sp.has("search_tags")
+
+if (has) {
+	tags = sp.get("search_tags")
+}
+
+a=$.get('/data-images?page=' + page + '&tags='+ tags.toString(), function(data) {
 	if (data == '') {
 		empty_page == true;
 	}
@@ -27,7 +40,12 @@ if ($(window).scrollTop() > margin && empty_page == false &&
 block_request == false) {
 	block_request = true;
 		page += 1;
-		$.get('/data-uncls?page=' + page, function(data) {
+		let sp = new URLSearchParams(window.location.search)
+		var tags = ""
+		if (sp.has("seach_tags")) {
+			tags = sp.get("search_tags")
+		}
+		$.get('/data-images?page=' + page + '&tags=' + tags.toString(), function(data) {
 			if (data == '') {
 				empty_page == true;
 			}
@@ -40,27 +58,22 @@ block_request == false) {
 		});
 	}
 });
-/*
-$('input.new_tag').click(function(e){
-        e.preventDefault();
-        $this = $(this);
-        $.post('/add_tag',
-        {
-                id: $(this).data('id'),
-                action: $(this).data('action')
-        },
-        function(data){
-                if (data['status'] == 'ok')
-                {
-                        var previous_action = $this.data('action');
-                        // toggle data-action
-                        $this.data('action', previous_action == 'publish' ?
-                        'unpublish' : 'publish');
-                        // toggle link text
-                        $this.text(previous_action == 'publish' ? 'unpublish' :
-                        'publish');
-                }
-        });
-});
-*/
+
+var $input = $('#id_search_tags')
+
+var SPACE = 32
+var ENTER = 13
+
+var tags_text = new Array()
+
+var b = $('button')
+
+var tags = b.wrapAll()
+
+for (var i = 0; i < tags.length; ++i) {
+	tags_text.push(tags[i].textContent);
+	console.log(tags_text)
+}
+
+$input.focus()
 {% endblock %}

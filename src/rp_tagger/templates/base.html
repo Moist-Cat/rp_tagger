@@ -4,15 +4,14 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width">
 		<link rel="stylesheet" href="/static/css/base.css">
-		<link rel="stylesheet" href="/static/css/home.css">
 		<title>{% block title %}{% endblock %}</title>
 	</head>
 	<body>
 		<div id="header">
 			<span class="logo">Image Tagger</span>
 			<ul class="menu">
-				<li><a href="/">Classify</a></li>
-				<li><a href="/images">Images</a></li>
+				<li><a href="/classify">Classify</a></li>
+				<li><a href="/">Images</a></li>
 			</ul>
 		</div>
 		<div id="content">
@@ -25,6 +24,8 @@
                 $(document).ready(function(){
                         {% block domready %}
                         {% endblock %}
+			{% block loopscript %}
+			{% endblock %}
                 });
         </script>
 	</body>

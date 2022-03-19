@@ -2,30 +2,13 @@ from pathlib import Path
 import sys
 
 # Paths
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(__file__).parent.parent
 CURR_DIR = Path().cwd()
-TEST_DIR = Path(__file__).parent.parent / "test"
-TEST_IMAGES_DIR = TEST_DIR / "test_images"
-
-IMAGES_FROM_PATH = "/home/luis/Downloads/"
-IMAGES_TO_PATH = "/home/luis/Pictures/RP/"
-
-UNCLS_IMAGES_DIR = BASE_DIR / "static" / "img"
 
 # Config
-DEBUG = True
-ACCEPT = ["*.png", "*.jpg", "*.gif", "*.webm"]
+DEBUG = False
+ACCEPT = ["*.png", "*.jpg", "*.gif", "*.webm", "*.jpeg", "*.webp"]
 DELETE_ORIGINAL = True
-
-# Database
-DATABASES = {
-        "default": {
-            "engine": f"sqlite:///{BASE_DIR}/db.sqlite",
-        },
-        "test": {
-            "engine": f"sqlite:///{TEST_DIR}/test_db.sqlite",
-        },
-}
 
 # Logging
 LOGGERS = {

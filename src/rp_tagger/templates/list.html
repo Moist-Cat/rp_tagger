@@ -1,19 +1,4 @@
 {% for image in images %}
-	<div class="image">
-		<div id="image" class="window" href="/static/img/{{ image['id']}}">
-			<a href="#{{ image['id'] }}"><img src="/static/img/{{ image['id'] }}"></a>	
-		</div>
-	</div>
-	<div id="{{ image['id'] }}" class="modalDialog">
-		<a href="/static/img/{{ image['id'] }}" class="image"><img src="/static/img/{{ image['id'] }}"></a>
-		{% if "tags" in image %}
-		<div class="info">
-			{% for tag in image["tags"] %}
-				<button name="tag" id="tag" class="title">{{ tag }}</button>
-			{% endfor %}
-		</div>
-	        <input class="text" id="new_tag" name="new_tag" title="Add a new tag">
-		{% endif %}
-		<a href="#"><span class="close">x</span></a>
-	</div>
+	{% set img_path = "/".join(image['path'].split('/')[-3:]) %}
+	<a href="/classify?id={{ image['id'] }}">{% if img_path.split('.')[-1] not in ("webm", "webp") %}<img class="image" src="{{ img_path }}">{% else %}<video src={{ img_path }} class="image"></video>{% endif %}</a>
 {% endfor %}

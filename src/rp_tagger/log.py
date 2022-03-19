@@ -2,9 +2,9 @@ import logging
 import logging.config
 from typing import Callable
 
-from rp_tagger.settings import LOGGERS
+from rp_tagger.conf import settings
 
-logging.config.dictConfig(LOGGERS)
+logging.config.dictConfig(settings.LOGGERS)
 
 
 def logged(cls) -> Callable:
