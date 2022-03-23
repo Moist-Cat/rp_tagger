@@ -1,1 +1,5 @@
 > Figure out a way of starting and quiting the test server in a different thread
+
+> Thumbnails
+
+> make slugifier for tags

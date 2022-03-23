@@ -6,7 +6,7 @@
         <h1>Add a new tag</h1>
 	{% set img_path = "/".join(image['path'].split('/')[-3:]) %}
 	<a href="{{ img_path }}">
-	{% if img_path.split('.')[-1] not in ("webm", "webp") %}
+	{% if img_path.split('.')[-1] != "webm" %}
 		<img id="{{ image['id'] }}" src="{{ img_path }}" class="image-detail"></img>
 	{% else %}
 		<video id="{{ image['id'] }}" src="{{ img_path }}" class="image-detail"></video>
@@ -52,8 +52,12 @@ $input.keyup(function(e) {
 	if (e.which === ENTER) {
 		// submit tag
 		var $tags = $('#id_tag').text;
+		var id = $('img').attr('id')
+		if (id == undefined) {
+			id = $('video').attr('id')
+		}
 		$.post('/add_tags', {
-			id: $('img').attr("id"),
+			id: id,
 			tags: tags_text
 	   }, function(data) {
 		location.reload()

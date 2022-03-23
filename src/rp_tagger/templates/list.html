@@ -1,4 +1,4 @@
 {% for image in images %}
 	{% set img_path = "/".join(image['path'].split('/')[-3:]) %}
-	<a href="/classify?id={{ image['id'] }}">{% if img_path.split('.')[-1] not in ("webm", "webp") %}<img class="image" src="{{ img_path }}">{% else %}<video src={{ img_path }} class="image"></video>{% endif %}</a>
+	<a href="/classify?id={{ image['id'] }}">{% if img_path.split('.')[-1] != "webm" %}<img class="image" src="{{ img_path }}">{% else %}<video src={{ img_path }} class="image"></video>{% endif %}</a>
 {% endfor %}

@@ -72,15 +72,15 @@ class DBClient:
         return self.session.query(Image).limit(200).all()
 
     def load_less_tagged(self):
-        """Start with the images with less tags. 200 for now
-        SELECT * from image ORDER BY (SELECT COUNT(image_id) from assoc_tagged_image WHERE image.id = image_id);
+        """
+        SELECT * from image ORDER BY (SELECT COUNT(image_id) from assoc_tagged_image WHERE image.id = image_id) LIMIT 200;
         """
         count_matches = select(func.count(
             tag_relationship._columns.image_id
         )).where(
               Image.id == tag_relationship._columns.image_id
           ).scalar_subquery()
-        result = self.session.query(Image).order_by(desc(count_matches)).limit(200).all()
+        result = self.session.query(Image).order_by(count_matches).limit(200).all()#.where(count_matches < 5).all()
         return result
 
     def count_unclassified(self):
@@ -117,12 +117,12 @@ class DBClient:
         self.session.delete(tag)
 
     def get_most_used_tags(self):
-        return self.session.query(Tag).order_by(desc(Tag.hits)).limit(100)
+        return self.session.query(Tag).order_by(desc(Tag.hits)).limit(30)
 
     def get_most_popular_tags(self):
         """SELECT tag.name FROM tag ORDER BY (SELECT count(assoc_tagged_image.tag_id) FROM assoc_tagged_image WHERE assoc_tagged_image.tag_id = tag.id) DESC;"""
         count_matches = select(func.count(tag_relationship._columns.tag_id)).where(tag_relationship._columns.tag_id == Tag.id).scalar_subquery()
-        return self.session.query(Tag).order_by(desc(count_matches)).limit(60).all()
+        return self.session.query(Tag).order_by(desc(count_matches)).limit(35).all()
 
     def query_image(self, id=None, path=None):
         query = self.session.query(Image)

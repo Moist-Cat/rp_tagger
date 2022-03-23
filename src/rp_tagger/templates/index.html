@@ -22,6 +22,9 @@ var has = sp.has("search_tags")
 if (has) {
 	tags = sp.get("search_tags")
 }
+else {
+	tags = ""
+}
 
 a=$.get('/data-images?page=' + page + '&tags='+ tags.toString(), function(data) {
 	if (data == '') {
@@ -41,9 +44,12 @@ block_request == false) {
 	block_request = true;
 		page += 1;
 		let sp = new URLSearchParams(window.location.search)
-		var tags = ""
-		if (sp.has("seach_tags")) {
+		has = sp.has("search_tags")
+		if (has) {
 			tags = sp.get("search_tags")
+		}
+		else {
+			tags = ""
 		}
 		$.get('/data-images?page=' + page + '&tags=' + tags.toString(), function(data) {
 			if (data == '') {
