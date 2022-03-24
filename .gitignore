@@ -8,7 +8,7 @@ __pycache__/
 *.json
 *.un~
 **/static/img/*
-!**/static/img.gitkeep
+!/static/img.gitkeep
 dist/*
 build/*
 **/*.egg-info/*
