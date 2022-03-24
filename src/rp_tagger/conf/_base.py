@@ -1,3 +1,5 @@
+import os
+import json
 from pathlib import Path
 import sys
 
@@ -19,14 +21,6 @@ LOGGERS = {
             "stream": sys.stderr,
             "formatter": "basic",
         },
-        "audit_file": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "maxBytes": 5000000,
-            "backupCount": 1,
-            "filename": BASE_DIR / "logs" / "api.error",
-            "encoding": "utf-8",
-            "formatter": "basic",
-        },
     },
     "formatters": {
         "basic": {
@@ -36,11 +30,6 @@ LOGGERS = {
     },
     "loggers": {
         "user_info": {
-            "handlers": ("console",),
-            "level": "INFO" if DEBUG is False else "DEBUG",
-        },
-        "audit": {"handlers": ("audit_file",), "level": "ERROR"},
-        "global": {
             "handlers": ("console",),
             "level": "INFO" if DEBUG is False else "DEBUG",
         },

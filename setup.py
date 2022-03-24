@@ -2,9 +2,9 @@ import setuptools
 from pathlib import Path
 
 with open("README.md", "r") as file:
-    long_description = fh.read()
+    long_description = file.read()
 
-with open("requirements.txt") as file:
+with open("requirements/pro.txt") as file:
     REQUIREMENTS = file.read().split("\n")
 
 setuptools.setup(

@@ -73,7 +73,8 @@ class TestServer(unittest.TestCase):
         tag = "<button name=\"tag\" id=\"id_tag_g\">g</button>"
         self.assertIn(tag, res.text)
 
-        img = """<a href="static/__debug__/__e52e29058facca1dd2d021757294b540.webm">\n\t\n\t\t<video id="8" src="static/__debug__/__e52e29058facca1dd2d021757294b540.webm" class="image-detail"></video>\n\t\n\t</a>"""
+        #img = """<video id="8" src="static/__debug__/__e52e29058facca1dd2d021757294b540.webm" class="image-detail"></video>"""
+        img = """<img id="6" src="static/__debug__/__f20e54aa04d69b2892e58e724e6887bb.gif" class="image-detail"></img>"""
         self.assertIn(img, res.text)
 
     def test_add_tags(self):

@@ -1,5 +1,7 @@
+from pathlib import Path
 import os
 import importlib
+import json
 
 class ImproperlyConfigured(Exception):
     pass
@@ -8,6 +10,8 @@ ENVIRONMENT_VARIABLE = "TAGGER_SETTINGS_MODULE"
 
 class Settings:
     def __init__(self, settings_module=None):
+        
+
         self.SETTINGS_MODULE = settings_module or os.environ.get(ENVIRONMENT_VARIABLE) or "rp_tagger.conf.pro"
 
         mod = importlib.import_module(self.SETTINGS_MODULE)

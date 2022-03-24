@@ -1,4 +1,7 @@
 recursive-include src/test/test_images *
 recursive-include src/rp_tagger/templates *
 recursive-include src/rp_tagger/static *
-exclude src/rp_tagger/static/img *
+
+exclude src/rp_tagger/static/img/* *
+
+include src/rp_tagger/static/img/*.txt *

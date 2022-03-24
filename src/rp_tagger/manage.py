@@ -1,3 +1,4 @@
+from pathlib import Path
 import os
 import sys
 
@@ -13,10 +14,11 @@ def get_command(command: list=sys.argv[1]):
         create_db(settings.DATABASES["default"]["engine"])
 
     elif command == "test":
-        from test import test_db
-        test_db.run()
+        from test import ut
+        ut.run()
 
     elif command == "runserver":
+        os.environ["TAGGER_SETTINGS_MODULE"] = "rp_tagger.conf.pro"
         from rp_tagger.server import runserver
         runserver()
 
