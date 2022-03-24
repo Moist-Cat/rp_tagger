@@ -10,7 +10,7 @@ def get_command(command: list=sys.argv[1]):
     if command == "shell":
         import test.shell
 
-    elif command == "makemigrations":
+    elif command == "migrate":
         create_db(settings.DATABASES["default"]["engine"])
 
     elif command == "test":

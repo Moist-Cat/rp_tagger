@@ -1,11 +1,21 @@
-# 
+# RP Tagger
+Web-based UI made for organing image folders using a tagging system.
 
 # Requirements
 To install all requirements, use the following snippet after installing python on your machine.
 
-    pip install -r requirements/_base.txt
+    pip install -r requirements/pro.txt
 
 # Usage
 
-# Testing
+Add the module to the PYTHONPATH
 
+    export PYTHONPATH=$PWD/src
+    
+Create the database.
+
+    ./rp_tagger migrate
+
+Run the server
+
+    ./rp_tagger runserver
