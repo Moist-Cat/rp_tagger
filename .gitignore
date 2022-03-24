@@ -10,3 +10,4 @@ __pycache__/
 **/static/*
 dist/*
 build/*
+**/*.egg-info/*
