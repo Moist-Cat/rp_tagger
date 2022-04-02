@@ -1,11 +1,11 @@
-from rp_tagger.settings import DATABASES
+from rp_tagger.conf import settings
 from rp_tagger.db import *
 from rp_tagger.api import *
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-ENGINE = DATABASES["default"]["engine"]
+ENGINE = settings.DATABASES["default"]["engine"]
 
 engine = create_engine(ENGINE)
 Session = sessionmaker(bind=engine)

@@ -23,7 +23,7 @@ class Test_API(unittest.TestCase):
 
     def test_load_images(self):
         images = load_images(TEST_FILES)
-        self.assertEqual(len(images), 8)
+        self.assertEqual(len(images), 20)
 
         image = images[0]
         self.assertEqual(image["tags"], ["sci",])

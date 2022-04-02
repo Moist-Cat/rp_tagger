@@ -135,7 +135,18 @@ def add_tags():
 
     client.update_image(id=id, tags=tags)
 
-    return ("", 200,) 
+    return ("", 200,)
+
+@app.route("/tree", methods=["GET","POST"])
+def tree():
+    if request.method == "GET":
+        return render_template("tree.html")
+    # it won't allow other than GET and POST
+    client.make_tree()
+    # XXX i know
+    client.already_queried = []
+
+    return redirect(url_for("index"))
 
 def runserver():
     app.run(port=5050)
