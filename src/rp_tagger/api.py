@@ -1,7 +1,15 @@
 import shutil
 from datetime import datetime
 import sqlalchemy.exc
-from sqlalchemy import desc, create_engine, update, func, select, column, text
+from sqlalchemy import (
+        desc,
+        create_engine,
+        update,
+        func,
+        select,
+        column,
+        text,
+)
 from sqlalchemy.orm import sessionmaker, aliased
 from sqlalchemy.orm.query import Query
 import json
@@ -102,13 +110,13 @@ class DBClient:
             stmt = query.select_from(Tag).join(tag_relationship, Tag.id == tag_relationship._columns.tag_id).join(Image, Image.id == tag_relationship._columns.image_id)
 
             tag = tags.pop()
+            query = stmt.filter(Tag.name.like(f"%{tag}%"))
             self.touch_tag(tag)
-            query = stmt.filter(Tag.name == tag)
 
             # this might be slow
             for tag in tags:
                 self.touch_tag(tag)
-                query = query.intersect(stmt.filter(Tag.name == tag))
+                query = query.intersect(stmt.filter(Tag.name.like(f"%{tag}%")))
         return query.order_by(desc(Image.hits)).offset(start).limit(size).all()
 
     def get_tag(self, id):
@@ -186,19 +194,13 @@ class DBClient:
 
     def touch_image(self, id):
 
-        self.session.execute(
-                update(Image).
-                where(Image.id == id).
-                values(hits=Image.hits + 1)
-        )
+        self.session.query(Image).filter(Image.id == id
+                ).update({Image.hits: Image.hits + 1}, synchronize_session=False)
         self.logger.debug(f"Updated image {id} with hits {Image.hits + 1}")
 
     def touch_tag(self, name):
-        self.session.execute(
-            update(Tag).
-            where(Tag.name == name).
-            values(hits=Tag.hits + 1)
-        )
+        self.session.query(Tag).filter(Tag.name.like(f"%{name}%")
+                ).update({Tag.hits: Tag.hits + 1}, synchronize_session="fetch")
         self.logger.debug(f"Updated tag {name} with hits {Tag.hits + 1}")
 
     def get_popular_tags_ids(self, ids=None, t_ids=None, min_elements=5):
