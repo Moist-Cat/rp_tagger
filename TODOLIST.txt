@@ -1,9 +1,7 @@
-> Partial searches
-
 > Figure out a way of starting and quiting the test server in a different thread
 
 > (We dont't neeed thumbnails)
 
 > make slugifier for tags
 
-> shortcuts
+> shortcuts?
