@@ -7,7 +7,7 @@ from rp_tagger.db import Image, Tag, tag_relationship
 from rp_tagger.api import load_images, DBClient
 from rp_tagger.conf import settings
 from rp_tagger.conf import _base
-from test import build_test_db
+from rp_tagger.test import build_test_db
 
 assert settings.DEBUG is True, "You can't test with production settings"
 

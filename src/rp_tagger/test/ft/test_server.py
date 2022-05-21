@@ -9,7 +9,7 @@ except ImportError:
 
 from rp_tagger.conf import settings, ENVIRONMENT_VARIABLE
 from rp_tagger.server import app
-from test import build_test_db
+from rp_tagger.test import build_test_db
 
 PORT = 14548
 HOST = "localhost"

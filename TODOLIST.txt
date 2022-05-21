@@ -1,3 +1,5 @@
+> Update unittests and fts
+
 > Figure out a way of starting and quiting the test server in a different thread
 
 > (We dont't neeed thumbnails)
