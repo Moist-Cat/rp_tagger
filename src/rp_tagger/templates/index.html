@@ -5,10 +5,18 @@
 	<form action="/" method="get">
 		<p>Search tags(Space-separated)</p>
 		<input id="id_search_tags" name="search_tags" class="text">
+        <input type="submit" value="submit">
 	</form>
 	<div id="image-list">
 		<!--- Stuff goes here --->
 	</div>
+    <div class="sidebar">
+        <h2>Most used tags</h2>
+        {% for tag in most_used_tags %}
+            <button name="tag_{{ tag['name'] }}" id="id_used_tag_{{ tag['name'] }}">{{ tag["name"] }}</button>
+        {% endfor %}
+    </div>
+
 {% endblock %}
 {% block domready %}
 var page = 0;
@@ -26,7 +34,7 @@ else {
 	tags = ""
 }
 
-a=$.get('/data-images?page=' + page + '&tags='+ tags.toString(), function(data) {
+$.get('/data-images?page=' + page + '&tags='+ tags.toString(), function(data) {
 	if (data == '') {
 		empty_page == true;
 	}
@@ -67,19 +75,18 @@ block_request == false) {
 
 var $input = $('#id_search_tags')
 
-var SPACE = 32
-var ENTER = 13
-
-var tags_text = new Array()
-
-var b = $('button')
-
-var tags = b.wrapAll()
-
-for (var i = 0; i < tags.length; ++i) {
-	tags_text.push(tags[i].textContent);
-	console.log(tags_text)
-}
+{% for tag in most_used_tags %}
+$("#id_used_tag_{{ tag['name'] }}").click(function(e) {
+    tag_name = $(this).text()
+    if (tag_name != "") {
+        var appendum = ""
+        if ($input.val() != "") {
+            appendum = " "
+        }
+        $input.val($input.val() + appendum + tag_name)
+    }
+});
+{% endfor  %}
 
 $input.focus()
 {% endblock %}

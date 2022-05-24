@@ -1,7 +1,15 @@
 import shutil
 from datetime import datetime
 import sqlalchemy.exc
-from sqlalchemy import desc, create_engine, update, func, select, column, text
+from sqlalchemy import (
+        desc,
+        create_engine,
+        update,
+        func,
+        select,
+        column,
+        text,
+)
 from sqlalchemy.orm import sessionmaker, aliased
 from sqlalchemy.orm.query import Query
 import json
@@ -100,11 +108,16 @@ class DBClient:
         if tags:
             """SELECT image.name FROM tag JOIN assoc_tagged_image ON tag.id = tag_id JOIN image ON image_id = image.id WHERE tag.name == "a" INTERSECT SELECT image.name FROM tag JOIN assoc_tagged_image ON tag.id = tag_id JOIN image ON image_id = image.id WHERE tag.name == "g"; (...)"""
             stmt = query.select_from(Tag).join(tag_relationship, Tag.id == tag_relationship._columns.tag_id).join(Image, Image.id == tag_relationship._columns.image_id)
-            query = stmt.filter(Tag.name == tags.pop())
+
+            tag = tags.pop()
+            query = stmt.filter(Tag.name.like(f"%{tag}%"))
+            self.touch_tag(tag)
+
             # this might be slow
             for tag in tags:
-                query = query.intersect(stmt.filter(Tag.name == tag))
-        return query.offset(start).limit(size).all()
+                self.touch_tag(tag)
+                query = query.intersect(stmt.filter(Tag.name.like(f"%{tag}%")))
+        return query.order_by(desc(Image.hits)).offset(start).limit(size).all()
 
     def get_tag(self, id):
         return self.session.query(Tag.name).filter(Tag.id==id).scalar()
@@ -124,7 +137,7 @@ class DBClient:
         self.session.delete(tag)
 
     def get_most_used_tags(self):
-        return self.session.query(Tag).order_by(desc(Tag.hits)).limit(30)
+        return self.session.query(Tag).order_by(desc(Tag.hits)).limit(30).all()
 
     def get_most_popular_tags(self, limit=35):
         """SELECT tag.name FROM tag ORDER BY (SELECT count(assoc_tagged_image.tag_id) FROM assoc_tagged_image WHERE assoc_tagged_image.tag_id = tag.id) DESC;"""
@@ -179,14 +192,16 @@ class DBClient:
 
         self.logger.info("Updated image %d. Params %s. Tags %s", id, params, tags)
 
-    def touch_image(self):
+    def touch_image(self, id):
 
-        self.session.execute(
-                update(Image).
-                where(Image.path == path).
-                values(hits=Image.hits + 1, last_modified=datetime.now())
-        )
+        self.session.query(Image).filter(Image.id == id
+                ).update({Image.hits: Image.hits + 1}, synchronize_session=False)
+        self.logger.debug(f"Updated image {id} with hits {Image.hits + 1}")
 
+    def touch_tag(self, name):
+        self.session.query(Tag).filter(Tag.name.like(f"%{name}%")
+                ).update({Tag.hits: Tag.hits + 1}, synchronize_session="fetch")
+        self.logger.debug(f"Updated tag {name} with hits {Tag.hits + 1}")
 
     def get_popular_tags_ids(self, ids=None, t_ids=None, min_elements=5):
         query = self.session.query(tag_relationship).subquery()
@@ -210,7 +225,6 @@ class DBClient:
     def _get_tagged_ids(self, tag_id, except_=None):
         except_ = except_ or []
         res = self.session.query(tag_relationship._columns.image_id)
-#        for tag in tag_id:
         res = res.filter(tag_relationship._columns.tag_id == tag_id)
         if except_:
             res = res.filter(tag_relationship._columns.image_id.not_in(except_))
@@ -222,13 +236,10 @@ class DBClient:
         stmt = self.session.query(tag_relationship._columns.image_id)
         query = stmt.filter(tag_relationship._columns.tag_id == tags.pop())
         # this might be slow
-#        breakpoint()
         for tag in tags:
             query = query.intersect(stmt.filter(tag_relationship._columns.tag_id == tag))
         if except_:
             query = query.filter(tag_relationship._columns.image_id.not_in(except_))
-#            breakpoint()
-#        breakpoint()
         return query
 
 
@@ -272,7 +283,7 @@ class DBClient:
             shutil.copy(image.path, path / image.name)
 
     def _make_tree(self, query=None, current_tags=None):
-        raise Exception("Only available for historical reasons.")
+        raise NotImplementedError("Kept for historical reasons.")
         main_query = self.session.query(main_query).filter(main_query.columns.tag_id.in_(tagged)).subquery()
         for tag_id in tagged.all():
             tag_id = tag_id[0]

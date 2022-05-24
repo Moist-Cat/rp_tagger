@@ -63,7 +63,11 @@ def _sync_new():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    most_used_tags = list(map(lambda i: i.as_dict(), client.get_most_used_tags()))
+
+    app.logger.info("Most used tags: %s", most_used_tags)
+
+    return render_template("index.html", most_used_tags=most_used_tags)
 
 @app.route("/data-images")
 def data_images():
@@ -83,8 +87,9 @@ def data_images():
     raw_images = client.get_paginated_result(PAGE_SIZE*page, PAGE_SIZE, tags=tags)
     images = list(map(lambda i: i.as_dict(), raw_images))
 
+
     app.logger.info("Loaded %d images. Page %d", len(images), page)
-    return render_template("list.html", images=images)
+    return render_template("list.html", images=images) 
 
 @app.route("/classify")
 def classify():
@@ -135,6 +140,11 @@ def add_tags():
 
     client.update_image(id=id, tags=tags)
 
+    return ("", 200,)
+
+@app.route("/touch-image/<int:id>")
+def touch_image(id):
+    client.touch_image(id)
     return ("", 200,)
 
 @app.route("/tree", methods=["GET","POST"])

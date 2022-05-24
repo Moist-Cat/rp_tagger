@@ -14,7 +14,7 @@ def get_command(command: list=sys.argv[1]):
         create_db(settings.DATABASES["default"]["engine"])
 
     elif command == "test":
-        from test import ut
+        from rp_tagger.test import ut
         ut.run()
 
     elif command == "runserver":
