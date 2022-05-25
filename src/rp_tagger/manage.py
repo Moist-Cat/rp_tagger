@@ -8,7 +8,7 @@ from rp_tagger.conf import settings
 def get_command(command: list=sys.argv[1]):
     """Macros to maange the db"""
     if command == "shell":
-        import test.shell
+        import rp_tagger.test.shell
 
     elif command == "migrate":
         create_db(settings.DATABASES["default"]["engine"])
@@ -23,7 +23,7 @@ def get_command(command: list=sys.argv[1]):
         runserver()
 
     elif command == "livetest":
-        from test.ft.test_server import run_test_server
+        from rp_tagger.test.ft.test_server import run_test_server
         run_test_server()
 
 
