@@ -13,7 +13,7 @@ DELETE_ORIGINAL = True
 # Database
 DATABASES = {
         "default": {
-            "engine": f"sqlite:///{BASE_DIR}/db.sqlite",
+            "engine": f"sqlite:///{BASE_DIR}/db/db.sqlite",
             "config": {"autocommit": True,}
         }
 }

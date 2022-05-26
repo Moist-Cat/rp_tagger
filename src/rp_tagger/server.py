@@ -6,6 +6,16 @@ from flask import Flask, render_template, request, redirect, url_for
 from rp_tagger.api import load_images, DBClient
 from rp_tagger.conf import settings
 
+try:
+    # auto tagging
+    import hydrus_dd as hydrus
+    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+    from hydrus_dd import evaluate
+    from hydrus_dd.__main__ import load_model_and_tags
+
+except ImportError:
+    hydrus = None
+
 app = Flask(__name__)
 
 TAG_SEPARATOR = "_"
@@ -114,6 +124,27 @@ def classify():
 
     return render_template("detail.html", image=image, popular_tags=popular_tags)
 
+@app.route("/auto-classify")
+def auto_classify():
+    if hydrus is None:
+        return ("hydrus-dd is not installed.", 400)
+    model, tags = load_model_and_tags(settings.MODEL_DIR / "model.h5", settings.MODEL_DIR / "tags.txt", compile_=None)
+
+    images = [1]
+    while any(images):
+        images = client.load_less_tagged_images()
+        for image in images:
+            if image.name.endswith("webp") or image.name.endswith("webm") or image.name.endswith("gif"):
+                continue
+            path = image.path
+            response = set(evaluate.eval(image_path=path, threshold=0.5, model=model, tags=tags))
+            assert any(response), f"Error, response is nil {response}"
+            app.logger.info("Guessed tags: %s for image %s", response, image.name)
+            client.update_image(id=image.id, tags=response)
+            app.logger.info("Successfully tagged %s images", image.path)
+    return ("Everything should be tagged now.", 200)
+
+
 @app.route("/add_tags", methods=["POST"])
 def add_tags():
     if "id" not in request.form:
@@ -147,6 +178,11 @@ def touch_image(id):
     client.touch_image(id)
     return ("", 200,)
 
+@app.route("/image/delete/<int:id>", methods=["POST"])
+def image_delete(id):
+    client.delete_image(id)
+    return redirect(url_for("classify"))
+
 @app.route("/tree", methods=["GET","POST"])
 def tree():
     if request.method == "GET":
@@ -159,4 +195,7 @@ def tree():
     return redirect(url_for("index"))
 
 def runserver():
-    app.run(port=5050)
+    app.run(host="0.0.0.0",port=5050)
+
+if __name__ == "__main__":
+    runserver()

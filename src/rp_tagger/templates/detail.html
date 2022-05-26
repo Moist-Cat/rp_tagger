@@ -3,7 +3,10 @@
 {% block title %}Tag an image{% endblock %}
 
 {% block body %}
-        <h1>Add a new tag</h1>
+    <h1>Add a new tag</h1>
+    <form action="/image/delete/{{ image['id'] }}" method="post">
+        <input value="DELETE" type="submit">
+    </form>
 	{% set img_path = "/".join(image['path'].split('/')[-3:]) %}
 	<a href="{{ img_path }}">
 	{% if img_path.split('.')[-1] != "webm" %}
