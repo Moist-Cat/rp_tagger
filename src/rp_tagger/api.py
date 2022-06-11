@@ -95,9 +95,6 @@ class DBClient:
         result = self.session.query(Image).order_by(count_matches).limit(200).all()#.where(count_matches < 5).all()
         return result
 
-    def count_unclassified(self):
-        return self.session.query(func.count(Image.id)).filter(Image.classified == False).one()[0]
-
     def count_images(self):
         return self.session.query(func.count(Image.id)).one()[0]
 

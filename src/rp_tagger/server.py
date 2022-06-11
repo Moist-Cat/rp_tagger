@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 TAG_SEPARATOR = "_"
 HASH_DELM = "__"
-PAGE_SIZE = 6
+PAGE_SIZE = 7
 
 CACHE = {"images": []}
 
@@ -83,7 +83,7 @@ def data_images():
 
     _sync_new()
 
-    # paginate the result from the cache. 5 per page
+    # paginate the result from the cache. 6 per page
     raw_images = client.get_paginated_result(PAGE_SIZE*page, PAGE_SIZE, tags=tags)
     images = list(map(lambda i: i.as_dict(), raw_images))
 
