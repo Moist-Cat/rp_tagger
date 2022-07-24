@@ -13,7 +13,7 @@
     <div class="sidebar">
         <h2>Most used tags</h2>
         {% for tag in most_used_tags %}
-            <button name="tag_{{ tag['name'] }}" id="id_used_tag_{{ tag['name'] }}">{{ tag["name"] }}</button>
+            <button name="tag_{{ tag['name'] }}" id="id_used_tag_{{ tag['name'].replace(':', '_').replace(' ', '_') }}">{{ tag["name"] }}</button>
         {% endfor %}
     </div>
 
@@ -76,7 +76,7 @@ block_request == false) {
 var $input = $('#id_search_tags')
 
 {% for tag in most_used_tags %}
-$("#id_used_tag_{{ tag['name'] }}").click(function(e) {
+$("#id_used_tag_{{ tag['name'].replace(':', '_').replace(' ', '_') }}").click(function(e) {
     tag_name = $(this).text()
     if (tag_name != "") {
         var appendum = ""
