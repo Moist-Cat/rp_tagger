@@ -1,5 +1,5 @@
 # RP Tagger
-Web-based UI made for organing image folders using a tagging system.
+Web-based UI made for managing image folders using a tagging system.
 
 # Requirements
 To install all requirements, use the following snippet after installing python on your machine.
@@ -19,3 +19,5 @@ Create the database.
 Run the server
 
     ./rp_tagger runserver
+
+It will load all images from the Downloads folder by default

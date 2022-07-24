@@ -26,11 +26,11 @@ class Test_API(unittest.TestCase):
         self.assertEqual(len(images), 20)
 
         image = images[0]
-        self.assertEqual(image["tags"], ["sci",])
+        self.assertEqual(image["tags"], ["g",])
 
         image = list(filter(lambda img: len(img["tags"]) > 1, images))[0]
         # we can't compare lists because the tags are not in order
-        self.assertEqual(set(image["tags"]).difference({"g", "a"}), set())
+        self.assertEqual(set(image["tags"]).difference({"g", "book"}), set())
 
     def test_dump_unclassified(self):
         images = load_images(TEST_FILES)

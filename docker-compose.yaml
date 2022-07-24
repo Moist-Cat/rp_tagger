@@ -1,0 +1,24 @@
+version: "3.3"
+
+services:
+  app:
+    image: rp_taggerpkg_app
+    build:
+      context: .
+      network: host
+#    container_name: app_rp
+    command: python /src/rp_tagger/server.py
+    volumes:
+      # map downloads
+      - ./new_images:/root/Downloads
+      # db
+      - ./db:/src/rp_tagger/db/
+      # images
+      - ./images:/src/rp_tagger/static/img/
+    ports:
+      - 5000:5000
+    environment:
+      - PYTHONPATH=/src/
+      - FLASK_ENV=development
+#      - FLASK_APP=/src/rp_tagger/server.py
+      - TAGGER_SETTINGS_MODULE=rp_tagger.conf.pro

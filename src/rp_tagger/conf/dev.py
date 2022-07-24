@@ -1,6 +1,6 @@
 from rp_tagger.conf._base import *
 
-TEST_DIR = Path(__file__).parent.parent.parent / "test"
+TEST_DIR = Path(__file__).parent.parent / "test"
 
 IMAGES_FROM_DIR = TEST_DIR / "test_images"
 IMAGES_DIR = TEST_DIR / "test_images_to"

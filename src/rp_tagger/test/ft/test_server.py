@@ -19,12 +19,14 @@ def run_test_server():
     os.environ[ENVIRONMENT_VARIABLE] = "rp_tagger.conf.dev"
     app.run(port=PORT)
 
+    # clean up
     os.environ[ENVIRONMENT_VARIABLE] = var
+    delete_test_images()
 
 def delete_test_images():
     imgs = glob.glob(str(settings.BASE_DIR / "static" / "__debug__") + "/*")
     # we don't want anything funny to happen while removing files
-    assert len(imgs) in (0,8), "Too many images in the test dir."
+    assert len(imgs) in (0,20,21), f"Too many images in the test dir. {len(imgs)}"
     for i in imgs:
         os.remove(i)
 

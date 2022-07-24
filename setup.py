@@ -9,7 +9,7 @@ with open("requirements/pro.txt") as file:
 
 setuptools.setup(
      name="rp_tagger",  
-     version="1.1.0",
+     version="1.3.1",
      author="Moist-Cat",
      author_email="moistanonpy@gmail.com",
      description="Tool for organizing image folders.",

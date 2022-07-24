@@ -5,8 +5,9 @@ from pathlib import Path
 import rp_tagger
 
 # env vars
-os.environ["FLASK_ENV"] = "production"
-os.environ["FLASK_APP"] = rp_tagger.__file__[:-11] + "server.py"
-os.environ["TAGGER_SETTINGS_MODULE"] = "rp_tagger.conf.pro"
+if "PYTHONPATH" not in os.environ: # meaning we are not in a dev env
+    os.environ["FLASK_ENV"] = "production"
+    os.environ["FLASK_APP"] = rp_tagger.__file__[:-11] + "server.py"
+    os.environ["TAGGER_SETTINGS_MODULE"] = "rp_tagger.conf.pro"
 
 get_command()

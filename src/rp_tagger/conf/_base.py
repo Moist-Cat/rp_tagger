@@ -7,6 +7,9 @@ import sys
 BASE_DIR = Path(__file__).parent.parent
 CURR_DIR = Path().cwd()
 
+# dd model path
+MODEL_DIR = Path().home() / "model"
+
 # Config
 DEBUG = False
 ACCEPT = ["*.png", "*.jpg", "*.gif", "*.webm", "*.jpeg", "*.webp"]
