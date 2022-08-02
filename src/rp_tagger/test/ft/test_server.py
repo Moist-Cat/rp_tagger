@@ -1,5 +1,4 @@
 import unittest
-from threading import Thread
 import glob
 import os
 try:

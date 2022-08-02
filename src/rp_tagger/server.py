@@ -20,7 +20,7 @@ app = Flask(__name__)
 
 TAG_SEPARATOR = "_"
 HASH_DELM = "__"
-PAGE_SIZE = 7
+PAGE_SIZE = 20
 
 CACHE = {"images": []}
 
@@ -93,7 +93,7 @@ def data_images():
 
     _sync_new()
 
-    # paginate the result from the cache. 6 per page
+    # paginate the result from the cache.
     raw_images = client.get_paginated_result(PAGE_SIZE*page, PAGE_SIZE, tags=tags)
     images = list(map(lambda i: i.as_dict(), raw_images))
 
@@ -104,7 +104,6 @@ def data_images():
 @app.route("/classify")
 def classify():
     """Yield new images to tag them"""
-
     _sync_new()
     if len(CACHE["images"]) == 0:
         images = client.load_less_tagged()
@@ -120,9 +119,8 @@ def classify():
         image = client.query_image(id=id).as_dict()
 
     raw_tags = client.get_most_popular_tags()
-    popular_tags = list(map(lambda t: t.as_dict(), raw_tags))
-
-    return render_template("detail.html", image=image, popular_tags=popular_tags)
+    app.logger.info(raw_tags)
+    return render_template("detail.html", image=image, popular_tags=raw_tags)
 
 @app.route("/auto-classify")
 def auto_classify():

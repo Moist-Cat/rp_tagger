@@ -1,9 +1,17 @@
-> Update unittests and fts
+> fix deletion not deleting cache
 
-> Figure out a way of starting and quiting the test server in a different thread
+> filename exporting
 
-> (We dont't neeed thumbnails)
+> Fix deleting tags with spaces
 
-> make slugifier for tags
+> Fix duplicates when querying tagged images
 
-> shortcuts?
+> Raise page size
+
+> Update unittests and fts (TODO)
+
+> Figure out a way of starting and quiting the test server in a different thread (TODO)
+
+> make slugifier for tags (TODO)
+
+> shortcuts? ()

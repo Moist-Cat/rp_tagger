@@ -29,7 +29,7 @@
 	<div class="sidebar">
 		<h2>Most popular tags</h2>
 		{% for tag in popular_tags %}
-			<button name="tag_{{ tag['name'] }}" id="id_popular_tag_{{ tag['name'] }}">{{ tag["name"] }}</button>
+			<button name="tag_{{ tag[0] }}" id="id_popular_tag_{{ tag[0] }}">{{ tag[0] }}</button>
 		{% endfor %}
 	</div>
 {% endblock %}
@@ -86,7 +86,7 @@ $('#id_tag_{{ tag['name'] }}').click(function(e) {
 })
 {% endfor %}
 {% for tag in  popular_tags %}
-$("#id_popular_tag_{{ tag['name'] }}").click(function(e) {
+$("#id_popular_tag_{{ tag[0] }}").click(function(e) {
 	tag_name = $(this).text()
 	if (tag_name != "") {
 		tags_text.push(tag_name)

@@ -176,13 +176,14 @@ class DBClient:
         return self.session.query(Tag).order_by(desc(Tag.hits)).limit(30).all()
 
     def get_most_popular_tags(self, limit=35):
-        """SELECT tag.name FROM tag ORDER BY (SELECT count(assoc_tagged_image.tag_id) FROM assoc_tagged_image WHERE assoc_tagged_image.tag_id = tag.id) DESC;"""
-        count_matches = (
-            select(func.count(tag_relationship._columns.tag_id))
-            .where(tag_relationship._columns.tag_id == Tag.id)
-            .scalar_subquery()
-        )
-        return self.session.query(Tag).order_by(desc(count_matches)).limit(limit).all()
+        """SELECT tag.name, count(assoc_tagged_image.tag_id) as ctag FROM assoc_tagged_image JOIN tag ON assoc_tagged_image.tag_id = tag.id GROUP BY tag.id ORDER BY ctag DESC;"""
+        return self.session.query(Tag.name).select_from(tag_relationship
+            ).join(
+                Tag, tag_relationship._columns.tag_id == Tag.id
+                ).group_by(Tag.id
+            ).order_by(
+                desc(func.count(tag_relationship._columns.tag_id))
+            ).limit(limit).all()
 
     def query_image(self, id=None, path=None):
         query = self.session.query(Image)
