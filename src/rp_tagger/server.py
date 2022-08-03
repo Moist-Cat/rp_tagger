@@ -1,20 +1,16 @@
 import os
 import hashlib
 
+try:
+    import requests
+except ImportError:
+    requests = None
 from flask import Flask, render_template, request, redirect, url_for
 
 from rp_tagger.api import load_images, DBClient
 from rp_tagger.conf import settings
 
-try:
-    # auto tagging
-    import hydrus_dd as hydrus
-    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-    from hydrus_dd import evaluate
-    from hydrus_dd.__main__ import load_model_and_tags
-
-except ImportError:
-    hydrus = None
+CLASSIFIER_URL = "http://127.0.0.1:4443"
 
 app = Flask(__name__)
 
@@ -124,9 +120,8 @@ def classify():
 
 @app.route("/auto-classify")
 def auto_classify():
-    if hydrus is None:
-        return ("hydrus-dd is not installed.", 400)
-    model, tags = load_model_and_tags(settings.MODEL_DIR / "model.h5", settings.MODEL_DIR / "tags.txt", compile_=None)
+    if requests is None:
+        return ("requests is not installed.", 400)
 
     images = [1]
     while any(images):
@@ -135,7 +130,10 @@ def auto_classify():
             if image.name.endswith("webp") or image.name.endswith("webm") or image.name.endswith("gif"):
                 continue
             path = image.path
-            response = set(evaluate.eval(image_path=path, threshold=0.5, model=model, tags=tags))
+
+            img_file = open(path, "r+b")
+            response = requests.post(CLASSIFIER_URL, files={"file": img_file}).json()
+            img_file.close()
             assert any(response), f"Error, response is nil {response}"
             app.logger.info("Guessed tags: %s for image %s", response, image.name)
             client.update_image(id=image.id, tags=response)

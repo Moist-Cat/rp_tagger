@@ -6,7 +6,7 @@ services:
     build:
       context: .
       network: host
-#    container_name: app_rp
+    container_name: app_rp
     command: python /src/rp_tagger/server.py
     volumes:
       # map downloads
