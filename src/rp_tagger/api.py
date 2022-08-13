@@ -316,57 +316,6 @@ class DBClient:
             if img_ids:
                 self.make_tree(img_ids, current_tags + [tag], self.already_queried)
 
-    def _make_tree(self, query=None, current_tags=None):
-        raise NotImplementedError("Kept for historical reasons.")
-        main_query = (
-            self.session.query(main_query)
-            .filter(main_query.columns.tag_id.in_(tagged))
-            .subquery()
-        )
-        for tag_id in tagged.all():
-            tag_id = tag_id[0]
-            # get images tagged with tag_id (all)
-            tagged_images_ids = (
-                self.session.query(main_query.columns.image_id)
-                .filter(main_query.columns.tag_id == tag_id)
-                .group_by(main_query.columns.image_id)
-                .subquery()
-            )
-            # tagged images (not exlcusive)
-            tagged_images = (
-                self.session.query(main_query)
-                .filter(main_query.columns.image_id.in_(tagged_images_ids))
-                .filter(main_query.columns.tag_id != tag_id)
-            )
-
-            # fetch image_ids (exclusive)
-            exclusive_images = self.session.query(tagged_images_ids)
-            if any(tagged_images):
-                self.make_tree(
-                    query=tagged_images.subquery(), current_tags=current_tags + [tag_id]
-                )
-
-                tagged_images = tagged_images.subquery()
-                not_excl_ids = select(tagged_images.columns.image_id).group_by(
-                    tagged_images.columns.image_id
-                )
-
-                exclusive_images = exclusive_images.filter(
-                    tagged_images_ids.columns.image_id.not_in(not_excl_ids)
-                )
-            exclusive_images = exclusive_images.group_by(
-                tagged_images_ids.columns.image_id
-            )
-
-            self.write_images(exclusive_images.all(), current_tags + [tag_id])
-
-            # prune image_ids from main query (all)
-            main_query = (
-                self.session.query(main_query)
-                .filter(main_query.columns.image_id.not_in(tagged_images_ids))
-                .subquery()
-            )
-
     def dump_images(self, images, current_tags=None):
         current_tags = current_tags or []
         # write the images on the filesystem

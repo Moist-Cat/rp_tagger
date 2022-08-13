@@ -1,3 +1,4 @@
+include requirements/pro.txt
 recursive-include src/test/test_images *
 recursive-include src/rp_tagger/templates *
 recursive-include src/rp_tagger/static *
