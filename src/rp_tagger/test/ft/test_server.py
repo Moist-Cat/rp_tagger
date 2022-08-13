@@ -25,7 +25,7 @@ def run_test_server():
 def delete_test_images():
     imgs = glob.glob(str(settings.BASE_DIR / "static" / "__debug__") + "/*")
     # we don't want anything funny to happen while removing files
-    assert len(imgs) in (0,20,21), f"Too many images in the test dir. {len(imgs)}"
+    assert len(imgs) in (0,20,21,22), f"Too many images in the test dir. {len(imgs)}"
     for i in imgs:
         os.remove(i)
 

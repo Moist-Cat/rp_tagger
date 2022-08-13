@@ -107,20 +107,15 @@ class DBClient:
 
     def load_less_tagged(self):
         """
-        SELECT * from image ORDER BY (SELECT COUNT(image_id) from assoc_tagged_image WHERE image.id = image_id) LIMIT 200;
+        select image.name FROM image WHERE image.id not in (SELECT assoc_tagged_image.image_id from assoc_tagged_image);
         """
-        count_matches = (
-            select(func.count(tag_relationship._columns.image_id))
-            .where(Image.id == tag_relationship._columns.image_id)
-            .scalar_subquery()
-        )
+        tagged_images = self.session.query(tag_relationship._columns.image_id).subquery()
         result = (
             self.session.query(Image)
-            .where(count_matches < 1)
-            .order_by(count_matches)
+            .where(Image.id.not_in(tagged_images))
             .limit(200)
             .all()
-        )  # .where(count_matches < 5).all()
+        )
         return result
 
     def count_unclassified(self):
@@ -175,15 +170,18 @@ class DBClient:
     def get_most_used_tags(self):
         return self.session.query(Tag).order_by(desc(Tag.hits)).limit(30).all()
 
-    def get_most_popular_tags(self, limit=35):
+    def get_most_popular_tags(self, limit=35, minrel=5):
         """SELECT tag.name, count(assoc_tagged_image.tag_id) as ctag FROM assoc_tagged_image JOIN tag ON assoc_tagged_image.tag_id = tag.id GROUP BY tag.id ORDER BY ctag DESC;"""
-        return self.session.query(Tag.name).select_from(tag_relationship
-            ).join(
-                Tag, tag_relationship._columns.tag_id == Tag.id
-                ).group_by(Tag.id
-            ).order_by(
-                desc(func.count(tag_relationship._columns.tag_id))
-            ).limit(limit).all()
+        return (
+            self.session.query(Tag.name)
+            .select_from(tag_relationship)
+            .join(Tag, tag_relationship._columns.tag_id == Tag.id)
+            .group_by(Tag.id)
+            .having(func.count(Tag.id) > minrel)
+            .order_by(desc(func.count(tag_relationship._columns.tag_id)))
+            .limit(limit)
+            .all()
+        )
 
     def query_image(self, id=None, path=None):
         query = self.session.query(Image)
@@ -244,25 +242,6 @@ class DBClient:
         )
         self.logger.debug(f"Updated tag {name} with hits {Tag.hits + 1}")
 
-    def get_popular_tags_ids(self, ids=None, t_ids=None, min_elements=5):
-        query = self.session.query(tag_relationship).subquery()
-
-        tag_id = query.columns.tag_id
-        tag_count = func.count(tag_id)
-
-        # temporary column to filter < 5
-        _tagged = self.session.query(query, tag_count).group_by(tag_id)
-        if ids:
-            _tagged = _tagged.filter(query.columns.image_id.in_(ids))
-        if t_ids:
-            _tagged = _tagged.filter(query.columns.tag_id.not_in(t_ids))
-        _tagged = _tagged.order_by(desc(tag_count)).subquery()
-        tagged = self.session.query(_tagged.columns.tag_id).filter(
-            _tagged.columns[2] > min_elements
-        )
-
-        return tagged
-
     def _get_tagged_ids(self, tag_id, except_=None):
         except_ = except_ or []
         res = self.session.query(tag_relationship._columns.image_id)
@@ -295,7 +274,7 @@ class DBClient:
             )
         )
 
-        res = self.get_popular_tags_ids(ids=all_ids, t_ids=current_tags)
+        res = self.get_most_popular_tags(limit=-1)
         res_sq = res.subquery()
         i = (
             self.session.query(tag_relationship._columns.image_id)

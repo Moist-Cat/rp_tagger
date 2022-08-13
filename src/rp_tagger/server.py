@@ -103,16 +103,18 @@ def classify():
     _sync_new()
     if len(CACHE["images"]) == 0:
         images = client.load_less_tagged()
-        if not any(images):
-            app.logger.info("Empty database. Can't classify anything.")
-            return redirect(url_for("index"))
-        CACHE["images"] = images
+        if images:
+            CACHE["images"] = images
+        else:
+            app.logger.info("No images without tags")
 
-    if not "id" in request.args:
-        image = CACHE["images"][-1].as_dict()
-    else:
+    if "id" in request.args:
         id = int(request.args["id"])
         image = client.query_image(id=id).as_dict()
+    else:
+        if not CACHE["images"]:
+            return redirect(url_for("index"))
+        image = CACHE["images"][-1].as_dict()
 
     raw_tags = client.get_most_popular_tags()
     app.logger.info(raw_tags)
