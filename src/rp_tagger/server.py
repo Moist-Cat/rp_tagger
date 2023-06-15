@@ -179,6 +179,12 @@ def touch_image(id):
 @app.route("/image/delete/<int:id>", methods=["POST"])
 def image_delete(id):
     client.delete_image(id)
+    # check if we get the image from cache or not
+    if len(CACHE["images"]) > 0:
+        img = CACHE["images"][-1].as_dict()
+        if img["id"] == id:
+            # it will eventually empty and we will get more from the DB
+            CACHE["images"].pop()
     return redirect(url_for("classify"))
 
 @app.route("/tree", methods=["GET","POST"])

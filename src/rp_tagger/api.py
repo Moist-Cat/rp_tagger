@@ -109,7 +109,9 @@ class DBClient:
         """
         select image.name FROM image WHERE image.id not in (SELECT assoc_tagged_image.image_id from assoc_tagged_image);
         """
-        tagged_images = self.session.query(tag_relationship._columns.image_id).subquery()
+        tagged_images = self.session.query(
+            tag_relationship._columns.image_id
+        ).subquery()
         result = (
             self.session.query(Image)
             .where(Image.id.not_in(tagged_images))
@@ -170,17 +172,16 @@ class DBClient:
     def get_most_used_tags(self):
         return self.session.query(Tag).order_by(desc(Tag.hits)).limit(30).all()
 
-    def get_most_popular_tags(self, limit=35, minrel=5):
+    def get_most_popular_tags(self, query=tag_relationship, limit=35, minrel=5):
         """SELECT tag.name, count(assoc_tagged_image.tag_id) as ctag FROM assoc_tagged_image JOIN tag ON assoc_tagged_image.tag_id = tag.id GROUP BY tag.id ORDER BY ctag DESC;"""
         return (
-            self.session.query(Tag.name)
+            self.session.query(Tag)
             .select_from(tag_relationship)
-            .join(Tag, tag_relationship._columns.tag_id == Tag.id)
+            .join(Tag, query._columns.tag_id == Tag.id)
             .group_by(Tag.id)
             .having(func.count(Tag.id) > minrel)
-            .order_by(desc(func.count(tag_relationship._columns.tag_id)))
+            .order_by(desc(func.count(query._columns.tag_id)))
             .limit(limit)
-            .all()
         )
 
     def query_image(self, id=None, path=None):
@@ -242,70 +243,51 @@ class DBClient:
         )
         self.logger.debug(f"Updated tag {name} with hits {Tag.hits + 1}")
 
-    def _get_tagged_ids(self, tag_id, except_=None):
-        except_ = except_ or []
-        res = self.session.query(tag_relationship._columns.image_id)
-        res = res.filter(tag_relationship._columns.tag_id == tag_id)
-        if except_:
-            res = res.filter(tag_relationship._columns.image_id.not_in(except_))
-        return res
-
-    def get_tagged_ids(self, tags, except_=None):
-        except_ = except_ or []
-        leet = tags.copy()
-        stmt = self.session.query(tag_relationship._columns.image_id)
-        query = stmt.filter(tag_relationship._columns.tag_id == tags.pop())
-        # this might be slow
-        for tag in tags:
-            query = query.intersect(
-                stmt.filter(tag_relationship._columns.tag_id == tag)
+    def _pruned_images(self, query, images):
+        return (
+            self.session.query(Image)
+            .join(
+                query.filter(query._columns.image_id.not_in(select(images.id))),
+                query._columns.image_id == Image.id,
             )
-        if except_:
-            query = query.filter(tag_relationship._columns.image_id.not_in(except_))
-        return query
-
-    def make_tree(self, all_ids=None, current_tags=None, already_queried=None):
-        current_tags = current_tags or []
-        # first time is just 1, 2... n
-        all_ids = all_ids or set(
-            map(
-                lambda i: i[0],
-                self.session.query(tag_relationship._columns.image_id).all(),
-            )
-        )
-
-        res = self.get_most_popular_tags(limit=-1)
-        res_sq = res.subquery()
-        i = (
-            self.session.query(tag_relationship._columns.image_id)
-            .join(res_sq, tag_relationship.columns.tag_id == res_sq.columns.tag_id)
             .all()
         )
-        new_ids = set(map(lambda e: e[0], i))
-        pruned = all_ids.difference(new_ids)
-        self.dump_images(pruned, current_tags)
-        self.already_queried.extend(pruned)
-        print(self.already_queried)
 
-        tags = list(map(lambda i: i[0], res.all()))
+    def make_tree(self, query=tag_relationship, current_tags: list = None, copied=None):
+        current_tags = current_tags or []
+        copied = copied or []
+
+        tags = self.get_most_popular_tags(query, limit=-1)
         for tag in tags:
-            res = self.get_tagged_ids(current_tags + [tag], self.already_queried)
-
-            img_ids = set(map(lambda i: i[0], res.all()))
-            if img_ids:
-                self.make_tree(img_ids, current_tags + [tag], self.already_queried)
+            images = tag.images
+            query = (
+                self.session.query(tag_relationship)
+                .filter(tag_relationship._columns.image_id._in(images))
+                .filter(tag_relationship._columns.tag_id != tag.id)  # not itself
+                .group_by(tag_relationship._columns.tag_id)
+            )
+            copied.extend(
+                self.dump_images(
+                    self._pruned_images(images, query, copied), current_tags
+                )
+            )
+            self.make_tree(query, current_tags.append(tag), copied)
 
     def dump_images(self, images, current_tags=None):
         current_tags = current_tags or []
+        new_images = []
         # write the images on the filesystem
-        for image_id in images:
+        for image in images:
             image = self.query_image(id=image_id)
             path = settings.IMAGES_DIR
             for tag in current_tags:
-                tag_name = self.get_tag(tag)
-                path = path / tag_name
+                path = path / tag.name
             try:
                 os.makedirs(path)
             except FileExistsError:
                 pass
-            shutil.copy(image.path, path / image.name)
+            image_path = path / image.name
+            if not image_path.exists():
+                shutil.copy(image.path, path / image.name)
+                new_images.append(image)
+        return new_images
